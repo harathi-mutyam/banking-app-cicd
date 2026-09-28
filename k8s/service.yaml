@@ -1,0 +1,29 @@
+---
+# MySQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  namespace: bankapp
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: mysql
+
+---
+# Bankapp Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: bankapp-service
+  namespace: bankapp
+spec:
+  type: LoadBalancer
+
+  ports:
+    - port: 80
+      targetPort: 8080
+
+  selector:
+    app: bankapp
