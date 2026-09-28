@@ -141,21 +141,8 @@ jobs:
         aws sts get-caller-identity   
     - name: Verify kubectl
       run: kubectl version --client
-    
+
      
-    - name: Configure kubeconfig
-      run: |
-        aws eks update-kubeconfig \
-          --region eu-north-1 \
-          --name eks-cluster
-    - name: Verify EKS connection
-      run: |
-        kubectl get nodes
-    - name: Deploy to EKS
-      run: |
-        kubectl apply -f k8s/
-
-
-        
+  
 
   
