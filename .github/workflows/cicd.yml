@@ -1,0 +1,159 @@
+name: CICD Pipeline 
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  compile:
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Build with Maven
+      run: mvn compile
+      
+ 
+              
+    - name: Gitleaks Installation
+      run: sudo apt install gitleaks -y
+    - name: Gitleaks Code Scan
+      run: gitleaks detect source . -r gitleaks-report.json -f json
+
+  test:
+    runs-on: self-hosted
+    needs: compile
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    - name: Unit Test Cases
+      run: mvn test
+
+  build_project_and_sonar_scan:
+    runs-on: self-hosted
+    needs: test
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build Project
+      run: mvn package
+
+    - name: Upload JAR artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-jar
+        path: target/*.jar
+
+    - name: Install unzip
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y unzip
+
+    - name: Verify unzip
+      run: unzip -v | head -n 2
+
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v5.0.0
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+
+    - name: SonarQube Quality Gate Check
+      id: sonarqube-quality-gate-check
+      uses: SonarSource/sonarqube-quality-gate-action@master
+      with:
+        pollingTimeoutSec: 600
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+
+  build_docker_image_and_push:
+    runs-on: self-hosted
+    needs: build_project_and_sonar_scan
+    steps:
+    - uses: actions/checkout@v4
+    - name: Download JAR artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: app-jar
+        path: app  # this will download JAR to ./app folder
+        
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ vars.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Build and Push Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        push: true
+        tags: harathi2026/bankapp:latest
+        file: ./Dockerfile
+        
+  deploy_to_kubernetes:
+    runs-on: self-hosted
+    needs: build_docker_image_and_push
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Check AWS CLI
+      run: |
+        aws --version
+        which aws
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v5
+      with: 
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-north-1
+        
+    - name: Verify AWS credentials
+      run: |
+        aws --version
+        aws sts get-caller-identity   
+    - name: Verify kubectl
+      run: kubectl version --client
+    
+     
+    - name: Configure kubeconfig
+      run: |
+        aws eks update-kubeconfig \
+          --region eu-north-1 \
+          --name eks-cluster
+    - name: Verify EKS connection
+      run: |
+        kubectl get nodes
+    - name: Deploy to EKS
+      run: |
+        kubectl apply -f ds.yml
+        
+
+  
