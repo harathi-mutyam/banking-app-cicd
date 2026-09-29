@@ -845,7 +845,7 @@ ________________________________________
 
 Run:
 vim k8s/namespace.yaml
-press i , :set mouse= , right click paste the content
+press i ,if right click not working for to paste the content press esc button , press :set mouse= , press enter key , right click paste the content
 Paste:
 apiVersion: v1
 kind: Namespace
