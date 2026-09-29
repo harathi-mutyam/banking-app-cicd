@@ -1055,7 +1055,7 @@ bankapp-xxxxx    1/1   Running
 ________________________________________
 
 ```
-##### STEP 11 — Test your Bankapp
+##### STEP 8 — Test your Bankapp
 ```bash
 Run:
 
@@ -1084,8 +1084,9 @@ you should normally access it using:
 **open server ec2 instance gitbash terminal**
 ```bash
 ubuntu@server:~/banking-app-cicd$
-
-# 1.	Check hidden files
+```
+###### 1.	Check hidden files
+```bash
 ls -la
 
 ls -la .github
@@ -1099,67 +1100,104 @@ vim .github/workflows/cicd.yml
 
 **Then make your required change Inside Vim:**
 
+```bash
 vim .github/workflows/cicd.yml
+
 Find:
 - name: Deploy to EKS
   run: |
     kubectl apply -f ds.yml
+
 Change to:
 - name: Deploy to EKS
   run: |
     kubectl apply -f k8s/
-Save:
-Esc
-:wq
-Enter
 
-Then check the change
+
+Save:
+Esc   ,  :wq   , Enter
+```
+**Then check the change**
+```bash
 git diff
+
 You should see that cicd.yml was changed.
+
 Then:
+
 git add .github/workflows/cicd.yml
 
 
 git commit -m "Update Kubernetes deployment path"
+
 git push origin main
-2. Git needs your name and email
+```
+###### 2. Git needs your name and email
+   
 Your commit failed because Git doesn't know the identity to attach to the commit.
+```bash
 You can configure it on this Ubuntu server.
-Use your GitHub email:
+
+# Use your GitHub email:
 git config --global user.name "Harathi Mutyam"
+
 git config --global user.email "ehmutyam@gmail.com"
-Check:
+
+# Check:
+
 git config --global --list
-You should see:
+
+# You should see:
+
 user.name=Harathi Mutyam
+
 user.email=ehmutyam@gmail.com
-3. Commit again
+
+# 4. Commit again
+
 Your files are already staged, so simply run:
+
 git commit -m "Organize Kubernetes manifests"
 
 You should get something similar to:
 [main xxxxxxx] Organize Kubernetes manifests
   ... files changed ...
 to set your account's default identity. Omit --global to set the identity only in this repository. fatal: unable to auto-detect email address (got 'ubuntu@server.(none)')
-GitHub authentication problem
+```
 
-Set up SSH authentication
+## GitHub authentication problem
+
+**Set up SSH authentication**
+
 Since this is your Ubuntu server/EC2 and you'll push from it repeatedly, SSH is a good option.
+```bash
 Step 1 — Check if you already have an SSH key
+
 Run:
+
 ls -la ~/.ssh
+
 If you see something like:
 id_ed25519
 id_ed25519.pub
+
 you may already have a key.
-If you don't have an SSH key, create one:
+
+## If you don't have an SSH key, create one:
+
 ssh-keygen -t ed25519 -C "ehmutyam@gmail.com"
+
 When you see:
 Enter file in which to save the key (/home/ubuntu/.ssh/id_ed25519):
+
 just press Enter.
+
 For the passphrase, you can press Enter twice if you want no passphrase for this learning server.
+
 ________________________________________
+
 Step 2 — Display your public key
+
 Run:
 cat ~/.ssh/id_ed25519.pub
 You'll get something beginning with:
@@ -1167,14 +1205,22 @@ ssh-ed25519 AAAA...
 example:
  ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEqRKYmX3rilFQRroG+4x1/KHE06U0EcRvVdEbb/NWnG ehmutyam@gmail.com
 
-Copy the entire single line. Starts from ssh- to till end 
+Copy the entire single line. Starts from ssh- to till end
+
 ⚠️ Copy only the .pub key. Never share:
 ~/.ssh/id_ed25519
+
 The private key must remain secret.
 ________________________________________
+
+```
+```bash
+
 Step 3 — Add the key to GitHub
-In GitHub: open your github repository select your
-Profile picture → Settings → SSH and GPG keys → New SSH key
+
+In GitHub: open your github repository --> select your Profile picture →
+Settings → SSH and GPG keys → New SSH key
+
 Enter:
 Title:
 Ubuntu EC2 Server
@@ -1185,6 +1231,7 @@ Paste the output from:
 cat ~/.ssh/id_ed25519.pub
 Save it.
 ________________________________________
+
 Step 4 — Test GitHub SSH
 Open your server ec2 instance gitbash terminal 
 On your Ubuntu server:
@@ -1218,7 +1265,8 @@ git push origin main
 
 
 
-
+```
+```bash
 previous history for reference
 30 mkdir -p k8s
    31  ls
@@ -1257,7 +1305,8 @@ previous history for reference
    86  git status
    87  git pull --rebase origin main
    88  git push origin main
-
+```
+```bash
 git add k8s/
 
 git add .github/workflows/cicd.yml
@@ -1265,10 +1314,12 @@ git add .github/workflows/cicd.yml
 git commit -m "Organize Kubernetes manifests"
 
 git push origin main
+```
 
-Then go to:
+**Then go to:
 Do not change the rest of your GitHub Actions workflow yet.
-Your workflow will still do:
+Your workflow will still do:**
+```bash
 Build
  ↓
 Test
@@ -1280,8 +1331,11 @@ Docker
 Push
  ↓
 Deploy to EKS
+```
 ________________________________________
+
 STEP 13 — Push these changes to GitHub
+```bash
 After everything works:
 git status
 Then:
@@ -1295,34 +1349,46 @@ git push origin main
 Then go to:
 GitHub → Github-Actions-Project → Actions
 Check that your workflow succeeds.
+```
 
 
 
+# Cd part
 
-Cd part
-
+in server gitbash terminal 
 Run these commands in order: you can see the explanation below
+```bash
 kubectl get nodes
+
 kubectl create namespace argocd
 kubectl apply -n argocd \
   --server-side \
   --force-conflicts \
   -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-Then:
-kubectl get pods -n argocd
 
-STEP 14 — Start Argo CD
+# Then:
+
+kubectl get pods -n argocd
+```
+## STEP 14 — Start Argo CD
+
 Where should you run these commands?
+```bash
 Run them on your Server / EKS management EC2, the same server where kubectl is working.
 First check that you are connected to your EKS cluster:
+
 kubectl get nodes
  
 You should see your EKS worker nodes, for example:
 If you see Ready, continue.
 ________________________________________
-STEP 14.1 — Create the Argo CD namespace
+```
+### STEP 14.1 — Create the Argo CD namespace
+```bash
 Run:
+
 kubectl create namespace argocd
+
 Expected output:
 namespace/argocd created
 Check it
@@ -1331,13 +1397,19 @@ Expected:
 NAME      STATUS   AGE
 argocd    Active   ...
 ________________________________________
-STEP 14.2 — Install Argo CD
+
+```
+### STEP 14.2 — Install Argo CD
+```bash
 Now run this command:
+
 kubectl apply -n argocd \
   --server-side \
   --force-conflicts \
   -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
 This command tells Kubernetes:
+
 "Install the Argo CD components inside my EKS cluster in the argocd namespace."
 You should see several resources being created, such as:
 customresourcedefinition.apiextensions.k8s.io/applications.argoproj.io created
@@ -1346,9 +1418,14 @@ service/argocd-server created
 deployment.apps/argocd-server created
 ...
 ________________________________________
-STEP 14.3 — Check Argo CD Pods
-Wait about 1–2 minutes, then run:
+
+```
+### STEP 14.3 — Check Argo CD Pods
+
+**Wait about 1–2 minutes, then run:**
+```bash
 kubectl get pods -n argocd
+
 You should eventually see pods similar to:
 NAME                                                READY   STATUS
 argocd-application-controller-xxxx                 1/1     Running
@@ -1363,60 +1440,92 @@ The important thing is:
 STATUS = Running
 and
 READY = 1/1
+
 If some pods say ContainerCreating
 Wait another minute and check again:
+
 kubectl get pods -n argocd
+```
 ________________________________________
+```bash
 🛑 STOP HERE
 Don't configure the GitHub repository yet.
+
 Don't create the Argo CD Application yet.
+
 Don't install Prometheus or Grafana yet.
+```
+### Step 14.4 Change Argo CD Service to LoadBalancer using YAML
 
-Step 14.4 Change Argo CD Service to LoadBalancer using YAML
-1.	Open the Argo CD service
+#### 1.	Open the Argo CD service
+```bash
 kubectl edit svc argocd-server -n argocd
-2.	Change type:  CluterIP to LoadBalancer
+```
+#### 2.	Change type:  CluterIP to LoadBalancer
 
-3.	Save the changes (Esc → :wq → Enter.)
-STEP 14.5 — Check the Service
+#### 3.	Save the changes (Esc → :wq → Enter.)
+
+### STEP 14.5 — Check the Service
+```bash
 kubectl get svc -n argocd
 
  
 Eventually:
 NAME            TYPE           CLUSTER-IP      EXTERNAL-IP
 argocd-server   LoadBalancer   10.x.x.x        xxx.elb.eu-north-1.amazonaws.com
-
+```
 Get Argo CD External Address
+```bash
 kubectl get svc argocd-server -n argocd
 kubectl get svc argocd-server -n argocd -o wide
- 
-Copy the external ip: a3ff295edd7a245d9a2705e0fedb0493-2035203452.eu-north-1.elb.amazonaws.com
+ ```
+**Copy the external ip: a3ff295edd7a245d9a2705e0fedb0493-2035203452.eu-north-1.elb.amazonaws.com**
+
 Like this
-Get the Argo CD Admin Password
+
+**Get the Argo CD Admin Password**
+```bash
 kubectl -n argocd get secret argocd-initial-admin-secret \ -o jsonpath="{.data.password}" | base64 -d
+
 copy the password: qSMeoxv-YrbaeP1a
+
 Copy this password somewhere temporarily.
-Your Argo CD login details are:
+```
+**Your Argo CD login details are:**
+```bash
 Username: admin
 Password: <password you just copied>
+```
 
-Open Argo CD in Your Browser
+**Open Argo CD in Your Browser**
+
+```bash
 Then open the external address in your browser and log in.: a3ff295edd7a245d9a2705e0fedb0493-2035203452.eu-north-1.elb.amazonaws.com
-
+```
+```bash
 Open this in your Windows browser:
 https://xxx.elb.eu-north-1.amazonaws.com
+
 You may see a browser warning about the certificate because this is the default Argo CD TLS certificate.
 That's expected for this learning setup.
-Proceed to the Argo CD login page.
+```
+**Proceed to the Argo CD login page.**
+
+```bash
 Enter:
 Username: admin
 Password: <your generated password> paste it here
-Press login button login
-Click on user Info (on left navigation bar) update password enter old password , new password and confirm passwordsave new password 
 
-Create Argo CD Application
-On the left side, click:  Applications    Then click:     NEW APP
-Fill Application Details
+Press login button login
+
+Click on user Info (on left navigation bar) --> update password enter old password , new password and confirm password-->save new password 
+```
+### Create Argo CD Application
+
+On the left side, click:  Applications  -->  Then click:   -->  NEW APP
+```bash
+# Fill Application Details
+
 Application Name: bankapp
 Project Name: select default
 Sync Policy: Manual
@@ -1425,8 +1534,11 @@ Repository URL:  <select Your git hub respository>
 https://github.com/harathi-mutyam/banking-app-cicd.git 
 Revision : type main
 Path : k8s
+
  
-Destination:
+# Destination:
+
+
 Cluster: https://kubernetes.default.svc
  Namespace: bankapp
 
@@ -1435,30 +1547,48 @@ Argo CD will create an application called:
 bankapp
 
  
-For sync your application Click on bankapp        
+For sync your application--> Click on bankapp     -->   
 
 You should see your Kubernetes resources: Namespace , Deployment , Service
-Click:  SYNC    Then click:    SYNCHRONIZE   
-Argo CD will take the YAML files from:
-GitHub    --    ↓  k8s/       ↓  Argo CD       ↓   EKS
- 
 
-Verify from Server EC2
+Click:  SYNC  -->  Then click:    SYNCHRONIZE   -->
+```
+
+**Argo CD will take the YAML files from:**
+```bash
+GitHub
+      ↓
+k8s/
+      ↓
+Argo CD
+      ↓
+EKS
+ 
+```
+**Verify from Server EC2 gitbash terminal**
+
 After synchronization finishes, go back to your Server EC2.
-Run:
+```bash
+# Run:
+
 kubectl get all -n bankapp
+
 You should see:
  
 pod/mysql-xxxxx 1/1 Running       pod/bankapp-xxxxx 1/1 Running 
 service/mysql-service                   service/bankapp-service 
 deployment.apps/mysql             deployment.apps/bankapp
-Also run:
+
+# Also run:
+
 kubectl get applications -n argocd
+
 NAME       SYNC STATUS   HEALTH STATUS
 bankapp    Synced        Healthy
-
+```
  
-Simple steps to follow without explanation:
+## **Simple steps to follow without explanation:**
+```bash
 1.	Applications 
 2.	+ NEW APP 
 3.	Application name → bankapp 
@@ -1475,32 +1605,42 @@ Then send me what you see in the Argo CD bankapp application — especially SYNC
 Now do it this one : GitHub Actions will stop deploying to EKS, and Argo CD will become responsible for CD.
 Yes. Since you have created and synced the bankapp Argo CD Application, the next important step is to make the architecture a proper GitOps setup.
 Remove Kubernetes Deployment from GitHub Actions
- 
+ ```
 
+# Make architecture a proper GitOps setup.
 
 Open cicd.yml
 
-On your Server EC2 git bash terminal   you must be in banking-app-cicd 
-directory
-cd ~/banking-app-cicd
-optional command:
+
+On your Server EC2 git bash terminal  -->  you must be in **banking-app-cicd** directory
+```bash
+cd ~/banking-app-cicd   #### optional command:
 
 git status
+
 Make sure there is no rebase or merge in progress.
 If you see:
 interactive rebase in progress
 
-Get the Latest Changes from GitHub
+# Get the Latest Changes from GitHub
+
 Run:
+
 git pull --rebase origin main
+
 If the command completes successfully, continue to the next step.
-Note: Do not run git pull --rebase again after starting a rebase. If Git reports a conflict, resolve the conflict first and run git rebase --continue.
+
+Note: Do not run git pull --rebase again after starting a rebase.
+If Git reports a conflict, resolve the conflict first and run git rebase --continue.
 
 
-
-
+```
+```bash
 vim .github/workflows/cicd.yml
-Find the Kubernetes deployment section Remove these three steps: 
+```
+Find the Kubernetes deployment section -->Remove these three steps: -->
+
+
  
 Save the file :wq!
 
