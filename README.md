@@ -1,7 +1,7 @@
 # CI/CD + SonarQube + Docker + Kubernetes + Argo CD + Prometheus + Grafana monitoring 
 ### for reference check 51 banking app cicd continution for 50.docx file i attached in that in repository
 
-<img src="images/project_workflow.png" alt="Logo" width="200" />
+<img src="images/project_workflow.png" alt="Logo" width="500" />
 
 
 ```bash
