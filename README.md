@@ -1,5 +1,75 @@
 # CI/CD + SonarQube + Docker + Kubernetes + Argo CD + Prometheus + Grafana monitoring 
 ### for reference check 51 banking app cicd continution for 50.docx file i attached in that in repository
+```bash
+                         BANKING APP CI/CD + GITOPS
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │     GitHub      │
+                         │ banking-app-cicd│
+                         └────────┬────────┘
+                                  │
+                         git push to main
+                                  │
+                                  ▼
+                    ┌─────────────────────────┐
+                    │     GitHub Actions      │
+                    │    Self-hosted Runner   │
+                    └────────────┬────────────┘
+                                 │
+              ┌──────────────────┼──────────────────┐
+              │                  │                  │
+              ▼                  ▼                  ▼
+        ┌──────────┐       ┌──────────┐      ┌────────────┐
+        │  Maven   │       │ Gitleaks │      │ SonarQube  │
+        │ Build    │       │ Security │      │ Code       │
+        │ + Test   │       │ Scan     │      │ Quality    │
+        └────┬─────┘       └────┬─────┘      └─────┬──────┘
+             │                  │                   │
+             └──────────────────┼───────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │  Docker Build   │
+                       └────────┬────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │   Docker Hub    │
+                       │ bankapp:latest  │
+                       └────────┬────────┘
+                                │
+                                │
+                ┌───────────────┴───────────────┐
+                │                               │
+                ▼                               ▼
+       ┌────────────────┐              ┌────────────────┐
+       │ GitHub k8s/    │              │     Argo CD    │
+       │ manifests      │─────────────►│    GitOps      │
+       └────────────────┘              └───────┬────────┘
+                                               │
+                                               ▼
+                                      ┌─────────────────┐
+                                      │   Amazon EKS    │
+                                      │                 │
+                                      │   bankapp        │
+                                      │   MySQL          │
+                                      └────────┬────────┘
+                                               │
+                         ┌─────────────────────┼───────────────────┐
+                         │                     │                   │
+                         ▼                     ▼                   ▼
+                   ┌───────────┐        ┌───────────┐       ┌────────────┐
+                   │Prometheus │───────►│  Grafana  │       │Alertmanager│
+                   │  Metrics  │        │ Dashboard │       │   Alerts   │
+                   └───────────┘        └───────────┘       └────────────┘
+
+
+```
+
+
+
+
 ## 1. Create and Clone the GitHub Repository
 Create an empty repository in GitHub with the name:
 **Banking-app-cicd**
