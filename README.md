@@ -1576,6 +1576,52 @@ chmod 700 get_helm.sh
 helm version
 
 
+
+                 ┌──────────────┐
+                 │   Developer  │
+                 └──────┬───────┘
+                        │
+                     git push
+                        ▼
+                 ┌──────────────┐
+                 │    GitHub    │
+                 └──────┬───────┘
+                        │
+                        ▼
+              ┌──────────────────┐
+              │   CI Pipeline    │
+              └────────┬─────────┘
+                       │
+                       ▼
+              Docker Image / Manifests
+                       │
+                       ▼
+              ┌──────────────────┐
+              │ Kubernetes       │
+              │                  │
+              │   ┌──────────┐   │
+              │   │ Argo CD  │   │
+              │   └──────────┘   │
+              │                  │
+              │   ┌──────────┐   │
+              │   │  Helm    │   │
+              │   └────┬─────┘   │
+              │        │         │
+              │   ┌────┴──────┐  │
+              │   │           │  │
+              │   ▼           ▼  │
+              │ Metrics     Grafana
+              │ Server          │
+              │                 │
+              └─────────────────┘
+                                │
+                                │ Alerts
+                                ▼
+                              Slack
+
+
+
+
 Add Prometheus Community repository
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 Expected:
