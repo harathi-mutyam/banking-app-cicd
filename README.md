@@ -807,24 +807,42 @@ Then:
 
 
 
-## Continuation of the Previous Project Setup
-```bash
+## 21 Continuation of the Previous Project Setup
 
 The previous project setup has been completed up to this point. In this section, we will continue from the existing setup and proceed with the Argo CD and GitOps configuration.
-Open the git bash terminal of server EC2 instance:
-Check are under banking-app-cicd  directory or not 
+
+**Open the git bash terminal of server EC2 instance:**
+
+Check are under **banking-app-cicd**  directory or not 
+
+```bash
+
 ubuntu@server:~/banking-app-cicd$ 
 
-STEP 4 — Create a k8s folder in eks cluster 
+```
+###### STEP 1 — Create a k8s folder in eks cluster
+
 Open server girbash terminal
-Run:
+```bash
+
+# Run:
+
 mkdir -p k8s
-Check:
+# Check:
+
 ls
+
 You should now see:
+
 k8s
+```
 ________________________________________
-STEP 5 — Create namespace.yaml
+
+
+##### STEP 2 — Create namespace.yaml
+
+```bash
+
 Run:
 vim k8s/namespace.yaml
 press i , :set mouse= , right click paste the content
@@ -835,7 +853,10 @@ metadata:
   name: bankapp
 Save:
 :wq!
-STEP 6 — Create deployment.yaml
+```
+##### STEP 3 — Create deployment.yaml
+
+```bash
 Run:
 vim k8s/deployment.yaml
 Paste:
@@ -912,10 +933,15 @@ spec:
             - name: SPRING_DATASOURCE_PASSWORD
               value: "Test@123"
 Save and exit.
+
+```
 ________________________________________
-STEP 7 — Create service.yaml
+##### STEP 4 — Create service.yaml
+```bash
 Run:
+
 vim  k8s/service.yaml
+
 Paste:
 ---
 # MySQL Service
@@ -946,14 +972,25 @@ spec:
 
   selector:
     app: bankapp
-Save and exit.
+
 ________________________________________
-STEP 8 — Check your new files
+
+```
+
+Save and exit.
+
+##### STEP 5 — Check your new files
+```bash
 Run:
+
 ls k8s
+
 You should see:
+
 deployment.yaml , namespace.yaml , service.yaml
+```
 So your project now looks like:
+```bash
 Github-Actions-Project
 │
 ├── k8s
@@ -965,23 +1002,38 @@ Github-Actions-Project
 ├── Dockerfile
 ├── pom.xml
 └── ...
+
 Do not delete ds.yml yet.
+
 We will delete it only after we confirm the new files work.
+```
 ________________________________________
-STEP 9 — Test Kubernetes
+##### STEP 6 — Test Kubernetes
+```bash
 Now we actually deploy the new files.
+
 First:
+
 kubectl apply -f k8s/namespace.yaml
+
 You should get:
+
 namespace/bankapp created
+
 Then:
+
 kubectl apply -f k8s/deployment.yaml
 Then:
 kubectl apply -f k8s/service.yaml
 ________________________________________
-STEP 10 — Check the application
+
+```
+##### STEP 7 — Check the application
+```bash
 Run:
+
 kubectl get all -n bankapp
+
 You should see something similar to:
 NAME                         READY
 pod/mysql-xxxxxxxx           1/1
@@ -1001,33 +1053,52 @@ You want:
 mysql-xxxxx      1/1   Running
 bankapp-xxxxx    1/1   Running
 ________________________________________
-STEP 11 — Test your Bankapp
+
+```
+##### STEP 11 — Test your Bankapp
+```bash
 Run:
+
 kubectl get svc -n bankapp
+
 Look for:
 bankapp-service
-You should eventually see an AWS LoadBalancer hostname in:
-EXTERNAL-IP
+```
+**You should eventually see an AWS LoadBalancer hostname in:
+EXTERNAL-IP**
+```bash
 For example:
 a123456789.eu-north-1.elb.amazonaws.com
-Open that address in your browser.
+```
+**Open that address in your browser.**
+```bash
 Because your service is:
 port: 80
 targetPort: 8080
+```
 you should normally access it using:
-http://LOAD-BALANCER-DNS
-open server ec2 instance gitbash terminal
+
+**http://LOAD-BALANCER-DNS**
+
+
+**open server ec2 instance gitbash terminal**
+```bash
 ubuntu@server:~/banking-app-cicd$
 
-1.	Check hidden files
+# 1.	Check hidden files
 ls -la
-ls -la .github
-ls -la .github/workflows
-you can see the cicd.yml
-vim .github/workflows/cicd.yml
 
-Then make your required change
-Inside Vim:
+ls -la .github
+
+ls -la .github/workflows
+
+you can see the cicd.yml
+
+vim .github/workflows/cicd.yml
+```
+
+**Then make your required change Inside Vim:**
+
 vim .github/workflows/cicd.yml
 Find:
 - name: Deploy to EKS
