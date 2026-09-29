@@ -566,11 +566,13 @@ Clone the repository in **server instance gitbash terminal**:
 
 ```bash
 
-git clone https://github.com/harathi-mutyam/Github-Actions-Project.git
+git clone https://github.com/harathi-mutyam/banking-app-cicd.git
+
+ls
 
 # Move into the project directory:
 
-cd Github-Actions-Project
+cd banking-app-cicd
 
 # Initialize Terraform:
 
