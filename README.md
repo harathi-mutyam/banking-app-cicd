@@ -1638,26 +1638,40 @@ If Git reports a conflict, resolve the conflict first and run git rebase --conti
 ```bash
 vim .github/workflows/cicd.yml
 ```
-Find the Kubernetes deployment section -->Remove these three steps: -->
 
+**Find the Kubernetes deployment section -->Remove these three steps: -->**
+
+<img src="images/remove_3steps_cicd.png" alt="Logo" />
 
  
 Save the file :wq!
 
+
 Check the Changes
+```bash
 git diff
+
 Check that only the direct Kubernetes deployment section was removed.
+
 You should no longer have:
 Configure kubeconfig
+
 Verify EKS connection
+
 Deploy to EKS
+
 kubectl apply -f k8s/
 
 git add .github/workflows/cicd.yml
+
 git status
+
 You should see:
+
 Changes to be committed:
+
     modified: .github/workflows/cicd.yml
+
 If you also see untracked files such as:
 .terraform/
 terraform.tfstate
@@ -1666,35 +1680,51 @@ kubectl.sha256
 do not add them.
 Do not use:
 git add .
-
+```
+```bash
 git commit -m "Move deployment to Argo CD"
+
 Expected result:
 main -> main
-
-Verify the Repository
+```
+**Verify the Repository**
+```bash
 git status
+
 You should see:
 Your branch is up to date with 'origin/main'.
 The untracked Terraform/kubectl files may still be displayed. That is okay because they were not added to Git.
-
+```
+```bash
 git push origin main
+```
+**for reference :**  
 
-for reference :
- 
-
-Check GitHub Actions
+**Check GitHub Actions**
+```bash
 Go to:
-GitHub → Github-Actions-Project → Actions
-Run it again
-The workflow should run successfully.
- 
 
-STEP 15.6 — Check Argo CD
-Go back to Argo CD.
+GitHub → Github-Actions-Project → Actions
+
+Run it again
+```
+
+**The workflow should run successfully.**
+ <img src="images/workflow_ingithub_sucessfull.png" alt="Logo" />
+
+
+### STEP 15.6 — Check Argo CD
+
+**Go back to Argo CD in browser.**
+```bash
 Open:
-Applications → bankapprefresh  SYNC synchronize
+
+Applications → bankapprefresh --> SYNC --> synchronize
+
 You should still see your application resources.
-Because Argo CD is now responsible for deployment:
+```
+## Because Argo CD is now responsible for deployment:
+```bash
 GitHub
   ↓
 k8s/
@@ -1702,19 +1732,27 @@ k8s/
 Argo CD
   ↓
 EKS
+```
 
-
-
+<img src="images/argocd_sync.png" alt="Logo" />
  
 
 
 
-Argo CD GitOps setup is now working successfully.
-STEP 16 — Verify GitOps from the Server EC2
+**Argo CD GitOps setup is now working successfully.**
+
+## STEP 16 — Verify GitOps from the Server EC2
+
 Before we install Prometheus and Grafana, let's verify the Kubernetes side from your terminal.
+
+```bash
+
 Run: in server gitbash terminal
+
 1. Check Argo CD Application
+
 kubectl get applications -n argocd
+
 Expected:
 NAME      SYNC STATUS   HEALTH STATUS
 bankapp   Synced        Healthy
@@ -1737,21 +1775,27 @@ Run:
 kubectl get applications -n argocd -o wide
 You should see:
 bankapp   Synced   Healthy
-
+```
+ <img src="images/cd_managed_resources.png" alt="Logo" />
  
+```bash
 
 kubectl get svc -n bankapp
 
 You should see your:
+
 mysql-service
 bankapp-service
+
 For bankapp-service, you should have the AWS LoadBalancer address.
+
 For example:
 NAME              TYPE           EXTERNAL-IP
 mysql-service     ClusterIP      ...
 bankapp-service   LoadBalancer   xxx.elb.eu-north-1.amazonaws.com
-
+```
 copy the externalip(a0eae422614be4c7a9445cf6f58daf0d-985785709.eu-north-1.elb.amazonaws.com)  of bankapp-service  .paste the external ip in browser and test it.is it working or not
+```bash
 
 kubectl get applications -n argocd
 
@@ -1759,14 +1803,20 @@ kubectl get all -n bankapp
 
 kubectl get svc -n bankapp
 
-our Argo CD + EKS + Bankapp GitOps setup is fully working.
 
+```
+ **our Argo CD + EKS + Bankapp GitOps setup is fully working.**
  
-Now we will start Prometheus:
+  <img src="images/argo_cd_sucess.png" alt="Logo" />
+  
+**Now we will start Prometheus:**
 
-We will use Helm to install the Prometheus + Grafana monitoring stack.
- 
-Check it in server ec2 gitbash terminal:
+
+**We will use Helm to install the Prometheus + Grafana monitoring stack.**
+   <img src="images/helm.png" alt="Logo" />
+   
+**Check it in server ec2 gitbash terminal:**
+```bash
 ubuntu@server:~/banking-app-cicd$  helm version
 
 Install Helm
@@ -1831,44 +1881,64 @@ helm version
                               Slack
 
 
+```
 
+**Add Prometheus Community repository**
+```bash
 
-Add Prometheus Community repository
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
 Expected:
 "prometheus-community" has been added to your repositories
 
-Update Helm repositories
+# Update Helm repositories
+
 helm repo update
+
 Expected:
 Update Complete. ⎈Happy Helming!⎈
-
-create the monitoring namespace
+```
+**create the monitoring namespace**
+```bash
 kubectl create namespace monitoring
 
 kubectl get namespace monitoring
+
 NAME         STATUS   AGE
 monitoring   Active   10s
-
-Install Prometheus + Grafana
+```
+### Install Prometheus + Grafana
 We will install the kube-prometheus-stack.
- 
+ <img src="images/kube-stack.png" alt="Logo" />
+
 
 
 Install the stack
+```bash
 helm install monitoring \ prometheus-community/kube-prometheus-stack \ -n monitoring
- 
- 
+ ```
+  <img src="images/helm-prometheus-monitoring.png" alt="Logo" />
+
+ <img src="images/prometheus_deployed.png" alt="Logo" />
+
+ <img src="images/what_it_mmeans.png" alt="Logo" />
 
  
-Check the Pods :
+**Check the Pods :**
+ 
+```bash
 kubectl get pods -n monitoring
+ ```
+ <img src="images/monitoring_pods.png" alt="Logo" />
  
+**Now Prometheus + Grafana installed successfully.**
 
-Now Prometheus + Grafana installed successfully.
+<img src="images/prometheus_grafana_suc.png" alt="Logo" />
  
-Now let's open Grafana.
-Get the Grafana Password
+**Now let's open Grafana.**
+```bash
+# Get the Grafana Password
+
 kubectl --namespace monitoring get secret monitoring-grafana \
   -o jsonpath="{.data.admin-password}" | base64 -d ; echo
 Copy the password: edmzcEr3jrgPoe9uzWeG1V8HaijVtgbWNSuWU1OZ
@@ -1877,82 +1947,138 @@ Copy the password: edmzcEr3jrgPoe9uzWeG1V8HaijVtgbWNSuWU1OZ
 Your Grafana login will be:
 Username: admin
 Password: <password you copied>
+```
 
-Open Grafana
-Because Grafana is currently inside EKS, let's first check its Service.
-kubectl get svc -n monitoring
+**Open Grafana**
+
+
  
+Because Grafana is currently inside EKS, let's first check its Service.
+```bash
+
+kubectl get svc -n monitoring
+
 You should see something similar to:
 NAME                         TYPE        CLUSTER-IP       EXTERNAL-IP
 monitoring-grafana           ClusterIP   172.20.x.x       <none>
 That's normal.
 For now, we'll use port-forwarding instead of creating another AWS LoadBalancer.
 
-Start Grafana Port Forward
+```
+ <img src="images/grafana_cmd.png" alt="Logo" />
+ 
+ 
+
+
+## Start Grafana Port Forward
+```bash
+
 kubectl port-forward svc/monitoring-grafana -n monitoring 3000:80
+
 output will be like this 
 Forwarding from 127.0.0.1:3000 -> 3000
 
 Forwarding from [::1]:3000 -> 3000
 
+```
 
+ <img src="images/grafan_port_forward.png" alt="Logo" />
  
 
-⚠️ Keep this terminal open.
-The port-forward is active only while this command is running.
+**⚠️ Keep this terminal open.**
 
-So Open one more server gitbash terminal
+# The port-forward is active only while this command is running.
 
+**So Open one more server gitbash terminal**
+
+```bash
 ssh -i Downloads/github-key.pem ubuntu@<public ip of server instance>
+
 ubuntu@server:~$
+
 cd ~/banking-app-cicd
-Get Grafana password:
+
+# Get Grafana password:
+
 kubectl -n monitoring get secret monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 -d ; echo
 
-copy the password: edmzcEr3jrgPoe9uzWeG1V8HaijVtgbWNSuWU1OZ
+```
 
-Check Grafana service:
+**copy the password: edmzcEr3jrgPoe9uzWeG1V8HaijVtgbWNSuWU1OZghgf**
+
+## Check Grafana service:
+```bash
 kubectl get svc -n monitoring
+
 Your Grafana service is running correctly.
+
 monitoring-grafana   ClusterIP   172.20.20.125   <none>   80/TCP
 
+```
+
+
+ <img src="images/check_grafana_svc.png" alt="Logo" />
+
+  <img src="images/grafana_setup_look.png" alt="Logo" />
+  
+
  
  
-Step 1 — Check Terminal 1
-Go back to your first Server EC2 terminal.
+# Step 1 — Check Terminal 1
+
+**Go back to your first Server EC2 terminal.**
+
 It should still be running:
+```bash
 kubectl port-forward svc/monitoring-grafana -n monitoring 3000:80
+
 You should see:
+
 Forwarding from 127.0.0.1:3000 -> 80 
 
 If you cant not see can you see like this 
 
-Forwarding from [::1]:3000 -> 3000 not a issue open another new server 
-
-instance gitbash terminal
-
+Forwarding from [::1]:3000 -> 3000 not a issue
+```
+### **open another new server instance gitbash terminal**
+```bash
 Do not close Terminal 1. Do not type anything
-Step 2 — Keep Terminal 2 open too
+```
+**Step 2 — Keep Terminal 2 open too**
+```bash
 Your second terminal can remain at: run this below command
+
 ubuntu@server:~/banking-app-cicd$
 
 kubectl -n monitoring get secret monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 -d ; echo
 
-
 copy the grafana admin password
-Terminal 1 → leave it running.
-Terminal 2 → run the password command.
+
+```
+**Terminal 1 → leave it running.**
+
+**Terminal 2 → run the password command.**
+
 You don't need to run anything else there right now.
 
+```bash
+
 Current situation
+
 Terminal 1
+
 kubectl port-forward ...
         ↓
 Server EC2 :3000
         ↓
 Grafana
-Now we need to connect your Windows browser to Server EC2.
-Step 3 — Next we need the SSH tunnel
+
+```
+
+**Now we need to connect your **Windows browser** to Server EC2.**
+
+#### Step 3 — Next we need the SSH tunnel
+```bash
 Now we need to connect:
 Windows Browser
       ↓
@@ -1967,91 +2093,143 @@ kubectl port-forward
 EKS
       ↓
 Grafana
+```
 
+**Open another gitbash terminal 3 for server ec2 instance:**
 
-Open another gitbash terminal 3 for server ec2 instance:
-Write the below command like this
-
+## Write the below command like this
+```bash
 ssh -i Downloads/github-key.pem -L 3000:localhost:3000 ubuntu@13.50.101.82
 
 ubuntu@server:~$
 
+```
 
-Step 4 — Open your Windows browser
+## Step 4 — Open your Windows browser
+
 Now open:
+```bash
 http://localhost:3000
+```
 You should see the Grafana login page.
+```bash
 Use:
+
 Username
 admin
+
 Password
 edmzcEr3jrgPoe9uzWeG1V8HaijVtgbWNSuWU1OZ
 
+```
+```bash
+
 You will have 3 things open:
-1.	Terminal 1 → kubectl port-forward — keep open 
-2.	Terminal 2 → SSH tunnel — keep open 
+
+1.	Terminal 1 → kubectl port-forward — keep open
+
+2.	Terminal 2 → SSH tunnel — keep open
+
 3.	Browser → http://localhost:3000
 
+```
 
-In Grafana UI Dashboards (in the left menu) → Browse  
-If you see folders
+In Grafana UI --> Dashboards (in the left menu) -->  Browse  -->  **If you see folders**
+```bash
 Look for something like:
+
 •	Kubernetes 
 •	Kubernetes / Compute Resources 
 •	Node Exporter 
 •	Prometheus
+ ```
  
- 
- 
+  <img src="images/grafanaui.png" alt="Logo" />
 
-If you see them, don't create a new dashboard.
+  
 
-Click in  Grafana browser Dashboards → Browse
-Then click:
-Kubernetes / Compute Resources / Cluster
+If you see them, **don't create a new dashboard.**
+
+**Click in  Grafana browser --> Dashboards → Browse**
+
+
+Then click:  Kubernetes / Compute Resources / Cluster  
+
  
+ <img src="images/grafana_compute_cluster.png" alt="Logo" />
+ 
+Grafana --> Dashboards → Browse and open:
 
-Grafana Dashboards → Browse and open:
+
 Kubernetes / Compute Resources / Nodes Overview
 
-Open server gitbash terminal 2 or terminal 3
- Run these below commands
+
+### **Open server gitbash terminal 2 or terminal 3**
+
+ **Run these below commands**
+ ```bash
+
 kubectl top pods -A --sort-by=memory
+
 kubectl top nodes
+
+```
+ <img src="images/3.png" alt="Logo" />
+
  
-STEP 1 — Check whether Metrics Server exists
-You are already in Server Terminal 2, so stay there.
+### **STEP 1 — Check whether Metrics Server exists**
+
+**You are already in Server Terminal 2, so stay there.**
+```bash
 Run:
 kubectl get deployment metrics-server -n kube-system
 
 Error from server (NotFound): deployments.apps "metrics-server" not found
+```
 
+### **Install Metrics Server**
 
-Install Metrics Server
-You are already in Server Terminal 2 git bash terminal:
+You are already in **Server Terminal 2 git bash terminal:**
+
+```bash
+
 ubuntu@server:~/banking-app-cicd$
+
 Run this command:
+
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+
 You should see resources such as:
 serviceaccount/metrics-server created
 clusterrole.rbac.authorization.k8s.io/system:aggregated-metrics-reader created
 deployment.apps/metrics-server created
 service/metrics-server created
+```
 
-Check Metrics Server
+### Check Metrics Server
+```bash
 kubectl get pods -n kube-system | grep metrics-server
+
 output must be like this metrics-server-xxxxxxxxxx-xxxxx 1/1 Running 0 1m
+
+
 kubectl top nodes
+
 kubectl top pods -A --sort-by=memory
 
- 
+ ```
+<img src="images/4.png" alt="Logo" />
 
  
+<img src="images/5.png" alt="Logo" />
 
 
+ <img src="images/6.png" alt="Logo" />
  
-
+```bash
 What you have completed
+
 Component	Status
 GitHub Actions CI/CD	✅ Completed
 SonarQube	✅ Completed
@@ -2068,39 +2246,67 @@ Grafana Kubernetes dashboards	✅ Working
 kubectl top nodes	✅ Working
 kubectl top pods	✅ Working
 
-Use Server  gitbash Terminal 2.
+```
+
+Use **Server  gitbash Terminal 2.**
+```bash
 Run:
+
 kubectl delete deployment bankapp -n default
+
 deployment.apps "bankapp" deleted
+
+
 kubectl delete deployment mysql -n default
+
 deployment.apps "mysql" deleted from default namespace
+
 kubectl get deployments -A
+
 You should still see:
 bankapp    bankapp
 bankapp    mysql
  
 you cannot see default
 kubectl get pods -A
-Check memory
+```
 
+**Check memory**
+
+
+```bash
 kubectl top nodes
- 
+ ```
+<img src="images/8.png" alt="Logo" />
 
+```bash
 kubectl top pods -A --sort-by=memory
-Final memory result
+```
+
+**Final memory result**
+```bash
+
 Before cleanup:
 Memory: 3014 MiB → 95%
 After removing the duplicate default workloads:
 Memory: 2340 MiB → 74%
 CPU:      74m    → 3%
+
+```
 So you recovered approximately 674 MiB of memory.
-Your final Kubernetes state
+
+**Your final Kubernetes state**
+```bash
 You now have only the intended application:
+
 bankapp namespace
 ├── bankapp pod       ✅
 └── mysql pod         ✅
+
 No duplicate default Bankapp/MySQL pods remain.
+
 Monitoring is working
+
 Your monitoring components are all running:
 Prometheus              ✅
 Grafana                 ✅
@@ -2108,10 +2314,16 @@ Alertmanager             ✅
 Node Exporter            ✅
 kube-state-metrics       ✅
 Metrics Server           ✅
+
+
 And kubectl top is working:
 CPU       3%
 Memory   74%
-🎉 Monitoring + Prometheus part: COMPLETE
+```
+
+
+## 🎉 Monitoring + Prometheus part: COMPLETE
+```bash
 You have now demonstrated:
                     EKS
                      │
@@ -2152,90 +2364,171 @@ GitHub Actions
           │
           ▼
    Prometheus + Grafana
-You can consider the project implementation complete.
+```
+
+**You can consider the project implementation complete.**
 
 
 
 
-Check Alertmanager Pod
-Use Server Git Bash Terminal 2.
+## Check Alertmanager Pod
+
+**Use Server Git Bash Terminal 2.**
+```bash
+
 ubuntu@server:~/banking-app-cicd$
+
 Run:
+
 kubectl get pods -n monitoring | grep alertmanager
+
 You should see something similar to:
+
 alertmanager-monitoring-kube-prometheus-alertmanager-0   2/2   Running
 What this means
 2/2 Running
+
 means the Alertmanager Pod has both required containers running.
-Check Alertmanager Service
+
+```
+### Check Alertmanager Service
+```bash
+
 kubectl get svc -n monitoring | grep alertmanager
+
 monitoring-kube-prometheus-alertmanager ClusterIP ... 9093/TCP
-Access Alertmanager
+```
+### Access Alertmanager
+```bash
 kubectl port-forward svc/monitoring-kube-prometheus-alertmanager -n monitoring 9093:9093
+
+
 You should see:
 Forwarding from 127.0.0.1:9093 -> 9093
 Forwarding from [::1]:9093 -> 9093
+```
 
-Important
-Keep this terminal open.
+**Important : Keep this terminal open.**
 
-Open another server gitbash terminal
-Create SSH Tunnel
-Open a new Windows Git Bash terminal.
+
+
+### Open another server gitbash terminal
+
+#### Create SSH Tunnel
+
+**Open a new Windows Git Bash terminal.**
+
 Run:
+```bash
 ssh -i Downloads/github-key.pem -L 9093:localhost:9093 ubuntu@<public ip of server instance 13.50.101.82>
+```
 
 Keep this terminal open too.
-Now open your Windows browser:
+
+**Now open your Windows browser:**
+```bash
 http://localhost:9093
-You should see the Alertmanager web interface.
+```
+You should see the **Alertmanager web interface.**
+
+<img src="images/13.png" alt="Logo" />
  
-STEP 5 — Understand the Alertmanager Page
+### STEP 5 — Understand the Alertmanager Page
+
 You should see sections related to:
+```bash
 Alerts
 Silences
 Status
 Alerts
+```
 Shows alerts received by Alertmanager.
-Silences
+
+**Silences**
+```bash
 Allows you to temporarily silence an alert.
+
 Example:
+
 CPU alert
     ↓
 Alertmanager
     ↓
 Silence for 1 hour
 Status
+
 Shows Alertmanager configuration and status.
+
+```
 ________________________________________
-STEP 6 — Check Prometheus Alerts
+
+### STEP 6 — Check Prometheus Alerts
+
 Now we need to see whether Prometheus already has alert rules.
-Open another Server Git Bash terminal.
+
+Open another **Server Git Bash terminal**.
+
+
 Run:
+```bash
+
 kubectl get prometheusrules -n monitoring
-You should see several PrometheusRule resources.
-You can also check:
+
+# You should see several PrometheusRule resources.
+
+# You can also check:
+
 kubectl get prometheusrules -n monitoring -o name
+
 The kube-prometheus-stack normally installs many predefined Kubernetes alerts.
+
+```
 ________________________________________
-STEP 7 — Check Alerts from Prometheus
-First find the Prometheus service:
+### STEP 7 — Check Alerts from Prometheus
+```bash
+# First find the Prometheus service:
+
 kubectl get svc -n monitoring | grep prometheus
+
 You should see:
+
 monitoring-kube-prometheus-prometheus
-Port-forward it:
+```
+
+**Port-forward it:**
+```bash
+
 kubectl port-forward svc/monitoring-kube-prometheus-prometheus -n monitoring 9090:9090
-Then open another Windows server Git Bash terminal:
+```
+
+**Then open another Windows server Git Bash terminal:**
+```bash
+# run this command
+
 ssh -i downloads/github-key.pem -L 9090:localhost:9090 ubuntu@<public ip of server ec2 instance13.50.101.82>
-Open:
+
+```
+
+Open in browser:
+
 http://localhost:9090
+
+
+
+ <img src="images/10.png" alt="Logo" />
+ 
  
 Then select:
+
 Alerts
+
+ <img src="images/11.png" alt="Logo" />
  
 You should see the Prometheus alert rules.
 ________________________________________
-STEP 8 — Understand the Complete Alert Flow
+## STEP 8 — Understand the Complete Alert Flow
+```bash
+
 This is important for your presentation.
                  Kubernetes
                      │
@@ -2255,7 +2548,12 @@ This is important for your presentation.
        Alerts              Notification
                               │
                        Email / Slack
-For example:
+
+```
+
+**For example:**
+```bash
+
 Node memory becomes very high
              ↓
 Prometheus detects condition
@@ -2267,10 +2565,17 @@ Alertmanager receives alert
 Alertmanager processes it
              ↓
 Notification is sent
+```
+
 ________________________________________
-STEP 9 — Email Notification
+
+## STEP 9 — Email Notification
+
 If you want your project to demonstrate real notifications, we can configure email.
+
 For example:
+```bash
+
 Prometheus
      ↓
 Alertmanager
@@ -2278,29 +2583,55 @@ Alertmanager
 SMTP
      ↓
 Your Email
+
+```
+
 For Gmail, this normally requires an App Password, not your normal Gmail password.
 For your project documentation, the configuration concept is:
+```bash
+
+
 receivers:
   - name: email-alert
     email_configs:
       - to: your-email@example.com
 However, don't add this configuration yet.
 First let's verify that your existing Alertmanager installation and alert rules are working.
+
+```
+
 ________________________________________
-STEP 10 — Important: Don't Reinstall Alertmanager
+## STEP 10 — Important: Don't Reinstall Alertmanager
+
 You already have:
+```bash
+
 monitoring
 └── alertmanager-monitoring-kube-prometheus-alertmanager-0
     └── 2/2 Running
-So you do not need:
+
+```
+
+So you **do not need:**
+
+
 helm install alertmanager ...
+
+
 Alertmanager was already installed automatically by:
+
+
 helm install monitoring \
 prometheus-community/kube-prometheus-stack \
 -n monitoring
+
+
 ________________________________________
-Your Alertmanager Project Architecture
+## Your Alertmanager Project Architecture
+
 Your final monitoring architecture can be documented as:
+```bash
+
                      EKS
                       │
           ┌───────────┴───────────┐
@@ -2319,17 +2650,45 @@ Your final monitoring architecture can be documented as:
                                          ┌────────┴────────┐
                                          │                 │
                                       Email             Slack
-Start only with STEP 1 now
+```
+
+
 In Server Git Bash Terminal 2, run:
+
+```bash
+
 kubectl get pods -n monitoring | grep alertmanager
 
 
 
+```
 
 
+# Complete Project Deletion Procedure
+```bash
+Step 1 — Stop port-forward sessions
+
+On Server Terminal 1, if Grafana port-forward is running:
+
+Ctrl + C
+
+If Alertmanager port-forward is running in another terminal:
+
+Ctrl + C
+
+On your Windows Git Bash SSH tunnel, also press:
+
+Ctrl + C
+
+# in server gitbash terminal run
+
+terraform destroy --auto-approve
 
 
+```
 
+
+```bash
 
 or your complete banking-app-cicd project, I recommend deleting resources in a controlled order so you don't leave AWS/EKS resources running and generating charges.
 Because your project contains EKS, EC2, Argo CD, Prometheus, Grafana, Alertmanager, Metrics Server, and GitHub Actions, use the procedure below.
