@@ -732,7 +732,9 @@ Then:
 
 
 
-Continuation of the Previous Project Setup
+## Continuation of the Previous Project Setup
+```bash
+
 The previous project setup has been completed up to this point. In this section, we will continue from the existing setup and proceed with the Argo CD and GitOps configuration.
 Open the git bash terminal of server EC2 instance:
 Check are under banking-app-cicd  directory or not 
@@ -2001,7 +2003,7 @@ or your complete banking-app-cicd project, I recommend deleting resources in a c
 Because your project contains EKS, EC2, Argo CD, Prometheus, Grafana, Alertmanager, Metrics Server, and GitHub Actions, use the procedure below.
 
 
-
+```
 
 ```bash
 Note: Our cicd.yaml file already contains the required configuration.
