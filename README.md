@@ -1,11 +1,22 @@
 # GitHub Actions + SonarQube + Docker + EKS Project
 ## 1. Create and Clone the GitHub Repository
 Create an empty repository in GitHub with the name:
-**Github-Actions-Project**
-Open VS Code → Terminal → Git Bash and clone the repository:
+**Banking-app-cicd**
+In D drive create folder for the project :with this name  banking-app-cicd
+In vs code open 
 ```bash
+Open VS Code → select open folder select the path where you have create a folder in D drive with name banking-app-cicd Terminal → Select Gitbash  check Are in correct path
+
+or not (/d/harathi/banking-app-cicd)now clone the project using below command
+
 git clone https://github.com/harathi-mutyam/Github-Actions-Project.git
+
+ls
+
+cd Github-Actions-Project/
+
 ```
+
 ## 2. Push Local Code to GitHub (optional here)
 **Open Git Bash in the project directory.**
 ```bash
@@ -38,7 +49,7 @@ git commit -m "project"
 
 # Add the GitHub remote repository:
 
-git remote add origin https://github.com/harathi-mutyam/Github-Actions-Project.git
+git remote add origin https://github.com/harathi-mutyam/banking-app-cicd.git
 
 # Push the code:
 
